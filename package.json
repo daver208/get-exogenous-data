@@ -1,0 +1,30 @@
+{
+  "name": "download",
+  "version": "0.0.0",
+  "description": "Download stucco data sources",
+  "main": "download.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stucco/data-sources.git"
+  },
+  "keywords": [
+    "download",
+    "stucco",
+    "data",
+    "sources"
+  ],
+  "author": "John Goodall <jgoodall@ornl.gov> (http://jgoodall.me/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stucco/data-sources/issues"
+  },
+  "dependencies": {
+    "request": "~2.27",
+    "js-yaml": "~2.1.0",
+    "unzip": "~0.1.8",
+    "async": "~0.2.9"
+  }
+}
