@@ -4,7 +4,7 @@
   "description": "Download stucco data sources",
   "main": "download.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node download.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,8 @@
     "request": "~2.27",
     "js-yaml": "~2.1.0",
     "unzip": "~0.1.8",
-    "async": "~0.2.9"
+    "async": "~0.2.9",
+    "validator": "~1.5"
+
   }
 }

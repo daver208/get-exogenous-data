@@ -1,4 +1,5 @@
-/* globals require:true, console:true, process:true */
+/*global module:true, require:true, console:true, process:true */
+
 'use strict';
 
 var fs = require('fs')
@@ -7,31 +8,29 @@ var fs = require('fs')
   , unzip = require('unzip')
   , request = require('request')
   , yaml = require('js-yaml')
-  , async = require('async');
+  , async = require('async')
+  , check = require('validator').validators
+  , outDir;
 
-var sitesFile = 'sites.yml'
-  , outDir = 'data';
 
-fs.exists(outDir, function (exists) {
-  if (! exists) fs.mkdirSync(outDir);
-});
-
-fs.readFile(sitesFile, {encoding:'utf8'}, function (err, data) {
-  if (err) {
-    console.error('Error reading sites file ' + sitesFile + ': ' + err);
-    process.exit(1);
-  }
-
-  var urlList = yaml.safeLoad(data);
-
-  async.each(urlList
-  , download
-  , function done (err) {
-      if (err) console.error(err);
+function parse(urlItem, callback){
+  if(typeof urlItem === 'string'){
+    if(check.isUrl(urlItem)){
+      download(urlItem.toString(),callback);  
     }
-  );
-
-})
+    else
+    {
+      console.log(urlItem + ' is not a valid URL');
+    }
+  }
+  else if(typeof urlItem === 'object'){
+    downloadObject(urlItem, callback);
+  }
+  else{
+    console.log('Unable to parse item');
+    console.log(urlItem);
+  }
+}
 
 function download (urlString, callback) {
   console.log('Downloading ' + urlString + '...');
@@ -62,3 +61,135 @@ function download (urlString, callback) {
 
   request(urlString).pipe(outStream);
 }
+
+function downloadObject (urlObject, callback) {
+  var srcUrl = ''
+    , dstFile='';
+
+  if(Object.keys(urlObject).length >2){
+  //If we have more than two properties we can't determine whic property is the output file without
+  //defining a convention
+    console.log('Ignoring : '+ Object.keys(urlObject)[0] + ' ' + Object.keys(urlObject)[1] + ' too many properties');
+  }
+  else if(Object.keys(urlObject).length == 1){
+  //Assume they mean to send in a list of URLS
+    if(check.isUrl(urlObject[Object.keys(urlObject)[0]])){
+      srcUrl = urlObject[Object.keys(urlObject)[0]];
+    }
+    else{
+      console.log('Ignoring : '+ Object.keys(urlObject)[0] + ' : ' + urlObject[Object.keys(urlObject)[0]] + ' invalid URL');
+    }
+
+  }
+  else{
+  //If we have a src URL and a path lets use it
+  //It might be worth validating the path in the future
+    if(check.isUrl(urlObject[Object.keys(urlObject)[0]])){
+      srcUrl = urlObject[Object.keys(urlObject)[0]];
+      dstFile = urlObject[Object.keys(urlObject)[1]];
+    }
+    else if(check.isUrl(urlObject[Object.keys(urlObject)[1]])){
+      srcUrl = urlObject[Object.keys(urlObject)[1]];
+      dstFile = urlObject[Object.keys(urlObject)[0]];
+    }
+    else{
+      console.log('Ignoring : '+ Object.keys(urlObject)[0] + ' : ' + urlObject[Object.keys(urlObject)[0]] + ' \n ' + Object.keys(urlObject)[1] + ' : ' +urlObject[Object.keys(urlObject)[1]] + ' no properties are a valid URL');
+    }
+  }
+  //dstFile = dstFile.replace('/^\\\/:/g)' , '');
+
+  var fileName = url.parse(srcUrl).pathname.split('/').pop()
+    , extension = path.extname(fileName)
+    , outFile = path.join(outDir, dstFile)
+    , outStream;
+
+
+  if (extension === '.zip') {
+  //if this is a zip file assume they wish to unzip into a directory in outDir
+    var zipFileName = outFile+extension;
+    outStream = fs.createWriteStream(zipFileName, {encoding:'utf8'})
+      .on('error', function (err) {
+        callback(err);
+      })
+      .on('finish', function() {
+        console.log('Downloaded ' + srcUrl);
+        callback();
+    });    
+    console.log('Downloading ' + srcUrl + ' and extracting to: ' + outFile);
+    if(!fs.existsSync(outFile)){
+      fs.mkdirSync(outFile);
+      console.log('Creating directory: '+ outFile);
+    }
+    else if(fs.statSync(outFile).isFile()){
+    //default back to the original directory, as we cant have a directory with the same name as the file
+      console.log('file : '+ outFile + ' already exists reverting to '+ outDir);
+      outFile = outDir;
+    }
+    outStream = unzip.Extract({ path: outFile})
+      .on('error', function (err) {
+        callback(err);
+      })
+      .on('close', function() {
+        var error;
+        fs.unlink(zipFileName, function(err) { error = err; });
+        console.log('Downloaded and unzipped ' + srcUrl + ' into ' + outFile);
+        callback(error);
+      });
+  }
+  else{
+    outStream = fs.createWriteStream(outFile, {encoding:'utf8'})
+      .on('error', function (err) {
+        callback(err);
+      })
+      .on('finish', function() {
+        console.log('Downloaded ' + srcUrl + ' to ' + outFile);
+        callback();
+    });      
+    console.log('Downloading ' + srcUrl + ' and saving to: ' + path.join(outDir, dstFile));
+  }
+
+  request(srcUrl).pipe(outStream);
+}
+
+
+/**
+ * Reads the specified file for datasets to download
+ *
+ * @public
+ * @param {String} sitesFile A path to an existing configuration file
+ * @param {String} dataDir the directory to store downloaded data in
+ * @param {Function} callback The callback function, returns (err)
+ */
+var startDownload = function(sitesFile, dataDir, callback) {
+  
+  fs.exists(dataDir, function (exists) {
+    if (! exists) fs.mkdirSync(dataDir);
+  });
+  outDir = dataDir;
+  fs.readFile(sitesFile, {encoding:'utf8'}, function (err, data) {
+    if (err) {
+      console.error('Error reading sites file ' + sitesFile + ': ' + err);
+      process.exit(1);
+    }
+    var urlList = yaml.safeLoad(data);
+    async.each(urlList
+    , parse
+    , function done (err) {
+        if (err) callback(err);
+      }
+    );  
+  });
+};
+
+function run () {
+
+  startDownload('sites.yml', 'data', function(err){
+    console.log(err);
+  });
+  
+}
+
+module.exports.startDownload = startDownload;
+run();
+
+
