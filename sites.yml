@@ -19,6 +19,7 @@
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2011.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2012.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2013.xml
+#- http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2013.xml
 #Object example of commented line above
 - src: http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2013.xml
 
