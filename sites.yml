@@ -3,7 +3,7 @@
 
 # Object Example - NOTE it doesn't matter what the property name is as
 #                       long as one of the properties is a URL
-- outFile: geo_country
+- outputDirectory: geo_country
   url: http://geolite.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip
 
 # [NVD](http://nvd.nist.gov/download.cfm)
@@ -13,20 +13,22 @@
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2005.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2006.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2007.xml
-- http://static.nv -ad.nist.gov/feeds/xml/cve/nvdcve-2.0-2008.xml
+- http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2008.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2009.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2010.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2011.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2012.xml
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2013.xml
+#Object example of commented line above
+- src: http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2013.xml
 
 # [CPE](http://cpe.mitre.org/)
 #- http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml
+
 # Rename Example - rename source URL to different filename on retreival
 #                  NOTE: Again property order and name do NOT matter
 - url: http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml
   dstFile: cpe_dictionary.xml
-  
 
 
 

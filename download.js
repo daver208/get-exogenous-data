@@ -10,6 +10,7 @@ var fs = require('fs')
   , yaml = require('js-yaml')
   , async = require('async')
   , check = require('validator').validators
+  , testFileName = /^[0-9a-zA-Z\^\&\'\@\{\}\[\]\,\$\=\!\-\#\(\)\.\%\+\~\_ ]+$/ // Excludes \ / : * ? \" < > |
   , outDir;
 
 
@@ -67,33 +68,36 @@ function downloadObject (urlObject, callback) {
     , dstFile='';
 
   if(Object.keys(urlObject).length >2){
-  //If we have more than two properties we can't determine whic property is the output file without
-  //defining a convention
+  //If we have more than two properties we can't determine which property is the output file without
+  //defining a naming convention convention
     console.log('Ignoring : '+ Object.keys(urlObject)[0] + ' ' + Object.keys(urlObject)[1] + ' too many properties');
+    return;
   }
   else if(Object.keys(urlObject).length == 1){
   //Assume they mean to send in a list of URLS
     if(check.isUrl(urlObject[Object.keys(urlObject)[0]])){
       srcUrl = urlObject[Object.keys(urlObject)[0]];
+      dstFile=path.delimiter;
     }
     else{
       console.log('Ignoring : '+ Object.keys(urlObject)[0] + ' : ' + urlObject[Object.keys(urlObject)[0]] + ' invalid URL');
+      return;
     }
-
   }
   else{
   //If we have a src URL and a path lets use it
   //It might be worth validating the path in the future
-    if(check.isUrl(urlObject[Object.keys(urlObject)[0]])){
+    if(check.isUrl(urlObject[Object.keys(urlObject)[0]]) && testFileName.test(urlObject[Object.keys(urlObject)[1]])){
       srcUrl = urlObject[Object.keys(urlObject)[0]];
       dstFile = urlObject[Object.keys(urlObject)[1]];
     }
-    else if(check.isUrl(urlObject[Object.keys(urlObject)[1]])){
+    else if(check.isUrl(urlObject[Object.keys(urlObject)[1]]) && testFileName.test(urlObject[Object.keys(urlObject)[0]])){
       srcUrl = urlObject[Object.keys(urlObject)[1]];
       dstFile = urlObject[Object.keys(urlObject)[0]];
     }
     else{
-      console.log('Ignoring : '+ Object.keys(urlObject)[0] + ' : ' + urlObject[Object.keys(urlObject)[0]] + ' \n ' + Object.keys(urlObject)[1] + ' : ' +urlObject[Object.keys(urlObject)[1]] + ' no properties are a valid URL');
+      console.log('\nIgnoring Object:\n\t{'+ Object.keys(urlObject)[0] + ' : ' + urlObject[Object.keys(urlObject)[0]] + '\n\t, ' + Object.keys(urlObject)[1] + ' : ' +urlObject[Object.keys(urlObject)[1]] + ' }\nInvalid URL or Filename\n');
+      return;
     }
   }
   //dstFile = dstFile.replace('/^\\\/:/g)' , '');
@@ -102,7 +106,6 @@ function downloadObject (urlObject, callback) {
     , extension = path.extname(fileName)
     , outFile = path.join(outDir, dstFile)
     , outStream;
-
 
   if (extension === '.zip') {
   //if this is a zip file assume they wish to unzip into a directory in outDir
@@ -132,20 +135,27 @@ function downloadObject (urlObject, callback) {
       .on('close', function() {
         var error;
         fs.unlink(zipFileName, function(err) { error = err; });
-        console.log('Downloaded and unzipped ' + srcUrl + ' into ' + outFile);
+        console.log('Downloaded and unzipped ' + srcUrl + ' into ' + dstFile);
         callback(error);
       });
   }
   else{
     outStream = fs.createWriteStream(outFile, {encoding:'utf8'})
       .on('error', function (err) {
+        console.log('Error:' +srcUrl +' =>' + outFile);
         callback(err);
       })
       .on('finish', function() {
         console.log('Downloaded ' + srcUrl + ' to ' + outFile);
         callback();
     });      
-    console.log('Downloading ' + srcUrl + ' and saving to: ' + path.join(outDir, dstFile));
+    if(dstFile !== path.delimiter){
+      console.log('Downloading ' + srcUrl + ' and saving as: ' + dstFile);  
+    }
+    else{
+      console.log('Downloading ' + srcUrl + '...');
+    }
+
   }
 
   request(srcUrl).pipe(outStream);
