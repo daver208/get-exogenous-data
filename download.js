@@ -109,7 +109,7 @@ function downloadObject (urlObject, callback) {
 
   if(dstFile !== path.delimiter){
     //renaming the original file
-     outFile = path.join(outDir, dstFile)
+     outFile = path.join(outDir, dstFile);
   }
   else{
     //keeping the original name

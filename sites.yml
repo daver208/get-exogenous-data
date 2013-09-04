@@ -38,4 +38,4 @@
 - http://cve.mitre.org/data/downloads/allitems.xml
 
 # [Exploit-DB](http://www.exploit-db.com/)
-- http://www.exploit-db.com/archive.tar.bz2
+- src: http://www.exploit-db.com/archive.tar.bz2
