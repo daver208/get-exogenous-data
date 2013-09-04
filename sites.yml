@@ -1,10 +1,11 @@
 # [MaxMind GeoIP data](http://dev.maxmind.com/geoip/legacy/geolite/)
-- http://download.maxmind.com/download/geoip/database/asnum/GeoIPASNum2.zip
-
+# download both of these into the geo_data folder
 # Object Example - NOTE it doesn't matter what the property name is as
 #                       long as one of the properties is a URL
-- outputDirectory: geo_country
+- outputDirectory: geo_data
   url: http://geolite.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip
+- srcURL: http://download.maxmind.com/download/geoip/database/asnum/GeoIPASNum2.zip  
+  outDir: geo_data
 
 # [NVD](http://nvd.nist.gov/download.cfm)
 - http://static.nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-2002.xml
@@ -29,7 +30,7 @@
 # Rename Example - rename source URL to different filename on retreival
 #                  NOTE: Again property order and name do NOT matter
 - url: http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml
-  dstFile: cpe_dictionary.xml
+  dstFile: cpe/cpe_dictionary.xml
 
 
 
@@ -37,4 +38,5 @@
 - http://cve.mitre.org/data/downloads/allitems.xml
 
 # [Exploit-DB](http://www.exploit-db.com/)
+# BUG!!!!!!
 - http://www.exploit-db.com/archive.tar.bz2

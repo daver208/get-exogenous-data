@@ -104,13 +104,27 @@ function downloadObject (urlObject, callback) {
 
   var fileName = url.parse(srcUrl).pathname.split('/').pop()
     , extension = path.extname(fileName)
-    , outFile = path.join(outDir, dstFile)
+    , outFile
     , outStream;
 
+  if(dstFile !== path.delimiter){
+    //renaming the original file
+     outFile = path.join(outDir, dstFile)
+  }
+  else{
+    //keeping the original name
+    outFile = path.join(outDir,fileName);
+  }
+
   if (extension === '.zip') {
-  //if this is a zip file assume they wish to unzip into a directory in outDir
-    var zipFileName = outFile+extension;
-    outStream = fs.createWriteStream(zipFileName, {encoding:'utf8'})
+  //if this is a zip file assume they wish to unzip into a new directory in outDir
+    var zipTemp = outFile;
+    if(dstFile !== path.delimiter){
+      //if we are extracting into a new directory, we need to temporarily
+      //download it as newName.zip so we can extract it into newName
+      zipTemp = outFile + extension;
+    }
+    outStream = fs.createWriteStream(zipTemp, {encoding:'utf8'})
       .on('error', function (err) {
         callback(err);
       })
@@ -134,7 +148,7 @@ function downloadObject (urlObject, callback) {
       })
       .on('close', function() {
         var error;
-        fs.unlink(zipFileName, function(err) { error = err; });
+        fs.unlink(zipTemp, function(err) { error = err; });
         console.log('Downloaded and unzipped ' + srcUrl + ' into ' + dstFile);
         callback(error);
       });
