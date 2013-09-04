@@ -30,7 +30,7 @@
 # Rename Example - rename source URL to different filename on retreival
 #                  NOTE: Again property order and name do NOT matter
 - url: http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml
-  dstFile: cpe/cpe_dictionary.xml
+  dstFile: cpe_v2.3.xml
 
 
 
@@ -38,5 +38,4 @@
 - http://cve.mitre.org/data/downloads/allitems.xml
 
 # [Exploit-DB](http://www.exploit-db.com/)
-# BUG!!!!!!
 - http://www.exploit-db.com/archive.tar.bz2
